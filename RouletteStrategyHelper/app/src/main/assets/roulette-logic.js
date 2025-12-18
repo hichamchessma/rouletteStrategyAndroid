@@ -596,30 +596,35 @@ function analyzeRouletteHistory(numbers, maxBet = 8) {
     let noRepetitionTierSignal = null;
     
     // Créer des signaux de no-repetition basés sur les compteurs de no-repetition
+    // UNIQUEMENT si la valeur est >= 5
     if (noRepCounts && noRepCounts.columnCandidate) {
         const currentColumn = noRepCounts.columnCandidate;
         const noRepValue = noRepCounts.columns[currentColumn];
         
-        // Créer un signal pour la colonne actuelle
-        noRepetitionColumnSignal = {
-            type: 'NO_REPETITION_COLUMN',
-            target: currentColumn,
-            noRepValue: noRepValue,
-            description: 'No repetition colonne'
-        };
+        // Créer un signal pour la colonne actuelle UNIQUEMENT si noRepValue >= 5
+        if (noRepValue >= 5) {
+            noRepetitionColumnSignal = {
+                type: 'NO_REPETITION_COLUMN',
+                target: currentColumn,
+                noRepValue: noRepValue,
+                description: 'No repetition colonne'
+            };
+        }
     }
     
     if (noRepCounts && noRepCounts.tierCandidate) {
         const currentTier = noRepCounts.tierCandidate;
         const noRepValue = noRepCounts.tiers[currentTier];
         
-        // Créer un signal pour le tier actuel
-        noRepetitionTierSignal = {
-            type: 'NO_REPETITION_TIER',
-            target: currentTier,
-            noRepValue: noRepValue,
-            description: 'No repetition tier'
-        };
+        // Créer un signal pour le tier actuel UNIQUEMENT si noRepValue >= 5
+        if (noRepValue >= 5) {
+            noRepetitionTierSignal = {
+                type: 'NO_REPETITION_TIER',
+                target: currentTier,
+                noRepValue: noRepValue,
+                description: 'No repetition tier'
+            };
+        }
     }
     
     console.log('Best Column Signal (Absence):', bestColumnSignal);

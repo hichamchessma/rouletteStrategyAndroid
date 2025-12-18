@@ -5,31 +5,15 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Générer automatiquement un historique aléatoire au démarrage pour tester
+    setTimeout(() => {
+        generateRandomHistory();
+    }, 500);
     // DOM Elements
     const maxBetSelect = document.getElementById('max-bet');
-    const newNumberInput = document.getElementById('new-number');
+    const newNumberInput = document.getElementById('number-picker-input');
     const randomHistoryBtn = document.getElementById('random-history-btn');
     const generatedNumbersContainer = document.getElementById('generated-numbers');
-    
-    // Column result elements (absence signal)
-    const columnSignalElement = document.getElementById('column-signal');
-    const columnAbsenceElement = document.getElementById('column-absence');
-    const columnBetElement = document.getElementById('column-bet');
-    
-    // Tier result elements (absence signal)
-    const tierSignalElement = document.getElementById('tier-signal');
-    const tierAbsenceElement = document.getElementById('tier-absence');
-    const tierBetElement = document.getElementById('tier-bet');
-    
-    // No Repetition Column result elements
-    const noRepetitionColumnSignalElement = document.getElementById('no-repetition-column-signal');
-    const noRepetitionColumnDescriptionElement = document.getElementById('no-repetition-column-description');
-    const noRepetitionColumnBetElement = document.getElementById('no-repetition-column-bet');
-    
-    // No Repetition Tier result elements
-    const noRepetitionTierSignalElement = document.getElementById('no-repetition-tier-signal');
-    const noRepetitionTierDescriptionElement = document.getElementById('no-repetition-tier-description');
-    const noRepetitionTierBetElement = document.getElementById('no-repetition-tier-bet');
     
     // Tracking elements for columns
     const column1AbsenceElement = document.getElementById('column-1-absence');
@@ -145,6 +129,56 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    /**
+     * Met à jour l'affichage visuel d'un pari sur le tableau de roulette
+     * @param {string} elementId - ID de l'élément HTML à mettre à jour
+     * @param {string} betValue - Valeur du pari à afficher
+     */
+    function updateVisualBet(elementId, betValue) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        // Réinitialiser les classes
+        element.classList.remove('active-bet');
+        
+        // Si le pari est actif (pas '-')
+        if (betValue && betValue !== '-') {
+            let betAmount = '-';
+            
+            // Vérifier si c'est un pari combiné (format: "5(a) + 3(n) = 8 sur C1")
+            if (betValue.includes('=')) {
+                // Extraire le montant total après le signe =
+                const totalMatch = betValue.match(/=\s*(\d+)/);
+                if (totalMatch && totalMatch[1]) {
+                    betAmount = totalMatch[1]; // Montant total après le signe =
+                }
+            } else {
+                // Pari simple (format: "5(a) sur C1" ou "3(n) sur T2")
+                const match = betValue.match(/\d+/);
+                if (match) {
+                    betAmount = match[0];
+                }
+            }
+            
+            // Mettre à jour le texte et ajouter la classe active
+            element.textContent = betAmount;
+            element.classList.add('active-bet');
+        } else {
+            // Pas de pari actif
+            if (elementId.includes('tier')) {
+                // Pour les tiers, afficher le label standard
+                const tierNumber = elementId.charAt(5);
+                if (tierNumber === '1') element.textContent = '1st 12';
+                else if (tierNumber === '2') element.textContent = '2nd 12';
+                else if (tierNumber === '3') element.textContent = '3rd 12';
+                else element.textContent = '-';
+            } else {
+                // Pour les colonnes, afficher un tiret
+                element.textContent = '-';
+            }
+        }
+    }
+    
     // Display functions are now handled directly in calculateNextBet
     
     /**
@@ -360,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const errorMsg = document.createElement('div');
             errorMsg.className = 'error-message';
             errorMsg.textContent = 'Veuillez entrer au moins 5 numéros';
-            document.querySelector('.new-number-section').after(errorMsg);
+            document.querySelector('.input-section').after(errorMsg);
             
             // Réinitialiser les valeurs
             document.getElementById('column-1-absence').textContent = '0';
@@ -384,10 +418,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tier-2-bet').textContent = '-';
             document.getElementById('tier-3-bet').textContent = '-';
             
-            document.getElementById('column-signal').textContent = 'Pas encore';
-            document.getElementById('tier-signal').textContent = 'Pas encore';
-            document.getElementById('no-repetition-column-signal').textContent = 'Pas encore';
-            document.getElementById('no-repetition-tier-signal').textContent = 'Pas encore';
+            // Réinitialiser les éléments visuels
+            updateVisualBet('column-1-bet-visual', null);
+            updateVisualBet('column-2-bet-visual', null);
+            updateVisualBet('column-3-bet-visual', null);
+            updateVisualBet('tier-1-bet-visual', null);
+            updateVisualBet('tier-2-bet-visual', null);
+            updateVisualBet('tier-3-bet-visual', null);
             return;
         }
         
@@ -435,17 +472,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('tier-3-no-rep').textContent = '0';
             }
             
-            // Mettre à jour les paris dans le tableau
+            // Mettre à jour les paris dans le tableau d'informations
             if (result.columnBets) {
                 document.getElementById('column-1-bet').textContent = result.columnBets[1] || '-';
                 document.getElementById('column-2-bet').textContent = result.columnBets[2] || '-';
                 document.getElementById('column-3-bet').textContent = result.columnBets[3] || '-';
+                
+                // Mettre à jour l'affichage visuel des paris sur les colonnes
+                updateVisualBet('column-1-bet-visual', result.columnBets[1]);
+                updateVisualBet('column-2-bet-visual', result.columnBets[2]);
+                updateVisualBet('column-3-bet-visual', result.columnBets[3]);
             }
             
             if (result.tierBets) {
                 document.getElementById('tier-1-bet').textContent = result.tierBets[1] || '-';
                 document.getElementById('tier-2-bet').textContent = result.tierBets[2] || '-';
                 document.getElementById('tier-3-bet').textContent = result.tierBets[3] || '-';
+                
+                // Mettre à jour l'affichage visuel des paris sur les tiers
+                updateVisualBet('tier-1-bet-visual', result.tierBets[1]);
+                updateVisualBet('tier-2-bet-visual', result.tierBets[2]);
+                updateVisualBet('tier-3-bet-visual', result.tierBets[3]);
             }
             
             // Les signaux actifs ont été supprimés de l'interface
