@@ -20,70 +20,77 @@
                 <!-- Tableau de roulette visuel -->
                 <div class="roulette-layout full-width">
                     <!-- Grille principale des numéros -->
-                    <div class="roulette-grid">
-                        <!-- Ligne 0 (Zero) -->
-                        <div class="roulette-row zero-row">
+                    <div class="roulette-table">
+                        <!-- Section du zéro -->
+                        <div class="zero-section">
                             <div class="number-cell green clickable" data-number="0">0</div>
-                            <div class="zero-spacer"></div>
                         </div>
                         
-                        <!-- Ligne 3 (C3) -->
-                        <div class="roulette-row">
-                            <div class="number-cell black clickable" data-number="3">3</div>
-                            <div class="number-cell red clickable" data-number="6">6</div>
-                            <div class="number-cell black clickable" data-number="9">9</div>
-                            <div class="number-cell red clickable" data-number="12">12</div>
-                            <div class="number-cell black clickable" data-number="15">15</div>
-                            <div class="number-cell red clickable" data-number="18">18</div>
-                            <div class="number-cell black clickable" data-number="21">21</div>
-                            <div class="number-cell red clickable" data-number="24">24</div>
-                            <div class="number-cell black clickable" data-number="27">27</div>
-                            <div class="number-cell red clickable" data-number="30">30</div>
-                            <div class="number-cell black clickable" data-number="33">33</div>
-                            <div class="number-cell red clickable" data-number="36">36</div>
-                            <div class="column-bet" id="column-3-bet-visual">-</div>
+                        <!-- Grille principale des numéros -->
+                        <div class="numbers-grid">
+                            <!-- Ligne 3 (C3) -->
+                            <div class="roulette-row">
+                                <div class="number-cell red clickable" data-number="3">3</div>
+                                <div class="number-cell black clickable" data-number="6">6</div>
+                                <div class="number-cell red clickable" data-number="9">9</div>
+                                <div class="number-cell black clickable" data-number="12">12</div>
+                                <div class="number-cell red clickable" data-number="15">15</div>
+                                <div class="number-cell black clickable" data-number="18">18</div>
+                                <div class="number-cell red clickable" data-number="21">21</div>
+                                <div class="number-cell black clickable" data-number="24">24</div>
+                                <div class="number-cell red clickable" data-number="27">27</div>
+                                <div class="number-cell black clickable" data-number="30">30</div>
+                                <div class="number-cell red clickable" data-number="33">33</div>
+                                <div class="number-cell black clickable" data-number="36">36</div>
+                            </div>
+                            
+                            <!-- Ligne 2 (C2) -->
+                            <div class="roulette-row">
+                                <div class="number-cell black clickable" data-number="2">2</div>
+                                <div class="number-cell red clickable" data-number="5">5</div>
+                                <div class="number-cell black clickable" data-number="8">8</div>
+                                <div class="number-cell red clickable" data-number="11">11</div>
+                                <div class="number-cell black clickable" data-number="14">14</div>
+                                <div class="number-cell red clickable" data-number="17">17</div>
+                                <div class="number-cell black clickable" data-number="20">20</div>
+                                <div class="number-cell red clickable" data-number="23">23</div>
+                                <div class="number-cell black clickable" data-number="26">26</div>
+                                <div class="number-cell red clickable" data-number="29">29</div>
+                                <div class="number-cell black clickable" data-number="32">32</div>
+                                <div class="number-cell red clickable" data-number="35">35</div>
+                            </div>
+                            
+                            <!-- Ligne 1 (C1) -->
+                            <div class="roulette-row">
+                                <div class="number-cell red clickable" data-number="1">1</div>
+                                <div class="number-cell black clickable" data-number="4">4</div>
+                                <div class="number-cell red clickable" data-number="7">7</div>
+                                <div class="number-cell black clickable" data-number="10">10</div>
+                                <div class="number-cell red clickable" data-number="13">13</div>
+                                <div class="number-cell black clickable" data-number="16">16</div>
+                                <div class="number-cell red clickable" data-number="19">19</div>
+                                <div class="number-cell black clickable" data-number="22">22</div>
+                                <div class="number-cell red clickable" data-number="25">25</div>
+                                <div class="number-cell black clickable" data-number="28">28</div>
+                                <div class="number-cell red clickable" data-number="31">31</div>
+                                <div class="number-cell black clickable" data-number="34">34</div>
+                            </div>
                         </div>
                         
-                        <!-- Ligne 2 (C2) -->
-                        <div class="roulette-row">
-                            <div class="number-cell red clickable" data-number="2">2</div>
-                            <div class="number-cell black clickable" data-number="5">5</div>
-                            <div class="number-cell red clickable" data-number="8">8</div>
-                            <div class="number-cell black clickable" data-number="11">11</div>
-                            <div class="number-cell red clickable" data-number="14">14</div>
-                            <div class="number-cell black clickable" data-number="17">17</div>
-                            <div class="number-cell red clickable" data-number="20">20</div>
-                            <div class="number-cell black clickable" data-number="23">23</div>
-                            <div class="number-cell red clickable" data-number="26">26</div>
-                            <div class="number-cell black clickable" data-number="29">29</div>
-                            <div class="number-cell red clickable" data-number="32">32</div>
-                            <div class="number-cell black clickable" data-number="35">35</div>
-                            <div class="column-bet" id="column-2-bet-visual">-</div>
+                        <!-- Section des colonnes -->
+                        <div class="column-section">
+                            <div class="column-bet" id="column-3-bet-visual">2 to 1</div>
+                            <div class="column-bet" id="column-2-bet-visual">2 to 1</div>
+                            <div class="column-bet" id="column-1-bet-visual">2 to 1</div>
                         </div>
                         
-                        <!-- Ligne 1 (C1) -->
-                        <div class="roulette-row">
-                            <div class="number-cell black clickable" data-number="1">1</div>
-                            <div class="number-cell red clickable" data-number="4">4</div>
-                            <div class="number-cell black clickable" data-number="7">7</div>
-                            <div class="number-cell red clickable" data-number="10">10</div>
-                            <div class="number-cell black clickable" data-number="13">13</div>
-                            <div class="number-cell red clickable" data-number="16">16</div>
-                            <div class="number-cell black clickable" data-number="19">19</div>
-                            <div class="number-cell red clickable" data-number="22">22</div>
-                            <div class="number-cell black clickable" data-number="25">25</div>
-                            <div class="number-cell red clickable" data-number="28">28</div>
-                            <div class="number-cell black clickable" data-number="31">31</div>
-                            <div class="number-cell red clickable" data-number="34">34</div>
-                            <div class="column-bet" id="column-1-bet-visual">-</div>
+                        <!-- Section des tiers (douzaines) -->
+                        <div class="dozen-section">
+                            <div class="dozen-bet" id="tier-1-bet-visual">1st 12</div>
+                            <div class="dozen-bet" id="tier-2-bet-visual">2nd 12</div>
+                            <div class="dozen-bet" id="tier-3-bet-visual">3rd 12</div>
                         </div>
-                        
-                        <!-- Tiers (douzaines) -->
-                        <div class="tier-row">
-                            <div class="tier-cell" id="tier-1-bet-visual">1st 12</div>
-                            <div class="tier-cell" id="tier-2-bet-visual">2nd 12</div>
-                            <div class="tier-cell" id="tier-3-bet-visual">3rd 12</div>
-                        </div>
+                    </div>
                     </div>
                 </div>
                 

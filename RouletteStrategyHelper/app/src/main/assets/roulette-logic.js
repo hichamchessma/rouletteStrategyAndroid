@@ -33,9 +33,9 @@ let signalHits = {
  * @returns {Object} Object containing column and tier classification
  */
 function classifyNumber(num) {
-    // Handle 0 as a special case
+    // Handle 0 as a special case - maintenant considéré comme une colonne et un tier à part
     if (num === 0) {
-        return { column: null, tier: null };
+        return { column: 0, tier: 0 }; // Le 0 est maintenant considéré comme colonne 0 et tier 0
     }
     
     // Définition en dur des colonnes (colonnes verticales sur le tapis)
@@ -106,11 +106,16 @@ function calculateNoRepetitionCounts(numbers) {
     // Extraire les séquences de colonnes et tiers
     const columnSequence = [];
     const tierSequence = [];
+    const originalNumbers = []; // Pour garder trace des numéros originaux
     
     for (const num of numbers) {
         const { column, tier } = classifyNumber(num);
-        if (column !== null) columnSequence.push(column);
-        if (tier !== null) tierSequence.push(tier);
+        // On garde tous les numéros, y compris le 0, pour pouvoir les comparer plus tard
+        originalNumbers.push(num);
+        
+        // Pour les séquences, on ignore le 0 (colonne 0, tier 0)
+        if (column !== null && column !== 0) columnSequence.push(column);
+        if (tier !== null && tier !== 0) tierSequence.push(tier);
     }
     
     // Initialiser les compteurs
@@ -123,19 +128,57 @@ function calculateNoRepetitionCounts(numbers) {
     
     // Déterminer la colonne candidate pour la répétition (la colonne actuelle)
     if (columnSequence.length > 0) {
-        const currentColumn = columnSequence[0];
-        noRepCounts.columnCandidate = currentColumn;
+        // Trouver le premier numéro non-zéro dans l'historique
+        let firstNonZeroIndex = 0;
+        while (firstNonZeroIndex < originalNumbers.length && originalNumbers[firstNonZeroIndex] === 0) {
+            firstNonZeroIndex++;
+        }
         
-        // Trouver la répétition la plus fraîche dans les colonnes
+        // Si on a trouvé un numéro non-zéro, utiliser sa colonne comme candidat
+        if (firstNonZeroIndex < originalNumbers.length) {
+            const { column } = classifyNumber(originalNumbers[firstNonZeroIndex]);
+            if (column !== 0 && column !== null) {
+                noRepCounts.columnCandidate = column;
+            }
+        } else {
+            // Fallback au premier élément de la séquence si tous sont des zéros
+            noRepCounts.columnCandidate = columnSequence[0];
+        }
+        
+        // Trouver la répétition la plus fraîche dans les colonnes en tenant compte des zéros
         let freshestRepetitionIndex = -1;
+        let lastNonZeroColumn = null;
+        let nonZeroCount = 0;
+        let zeroCount = 0; // Compteur pour les zéros rencontrés
         
         // Parcourir l'historique pour trouver la répétition la plus fraîche
-        for (let i = 0; i < columnSequence.length - 1; i++) {
-            if (columnSequence[i] === columnSequence[i+1]) {
-                // Répétition trouvée
-                freshestRepetitionIndex = i;
+        for (let i = 0; i < originalNumbers.length; i++) {
+            const num = originalNumbers[i];
+            const { column } = classifyNumber(num);
+            
+            // Si c'est un zéro, on incrémente le compteur de zéros et on continue
+            if (column === 0) {
+                zeroCount++;
+                continue;
+            }
+            
+            // Si c'est le premier numéro non-zéro, on l'enregistre
+            if (lastNonZeroColumn === null) {
+                lastNonZeroColumn = column;
+                nonZeroCount++;
+                continue;
+            }
+            
+            // Si c'est une répétition, on arrête
+            if (column === lastNonZeroColumn) {
+                // On ajoute le nombre de zéros rencontrés au compteur de non-répétition
+                freshestRepetitionIndex = nonZeroCount - 1 + zeroCount;
                 break;
             }
+            
+            // Sinon, on met à jour lastNonZeroColumn et on continue
+            lastNonZeroColumn = column;
+            nonZeroCount++;
         }
         
         // Si aucune répétition n'a été trouvée, utiliser la longueur totale de la séquence
@@ -160,19 +203,57 @@ function calculateNoRepetitionCounts(numbers) {
     
     // Déterminer le tier candidat pour la répétition (le tier actuel)
     if (tierSequence.length > 0) {
-        const currentTier = tierSequence[0];
-        noRepCounts.tierCandidate = currentTier;
+        // Trouver le premier numéro non-zéro dans l'historique
+        let firstNonZeroIndex = 0;
+        while (firstNonZeroIndex < originalNumbers.length && originalNumbers[firstNonZeroIndex] === 0) {
+            firstNonZeroIndex++;
+        }
         
-        // Trouver la répétition la plus fraîche dans les tiers
+        // Si on a trouvé un numéro non-zéro, utiliser son tier comme candidat
+        if (firstNonZeroIndex < originalNumbers.length) {
+            const { tier } = classifyNumber(originalNumbers[firstNonZeroIndex]);
+            if (tier !== 0 && tier !== null) {
+                noRepCounts.tierCandidate = tier;
+            }
+        } else {
+            // Fallback au premier élément de la séquence si tous sont des zéros
+            noRepCounts.tierCandidate = tierSequence[0];
+        }
+        
+        // Trouver la répétition la plus fraîche dans les tiers en tenant compte des zéros
         let freshestRepetitionIndex = -1;
+        let lastNonZeroTier = null;
+        let nonZeroCount = 0;
+        let zeroCount = 0; // Compteur pour les zéros rencontrés
         
         // Parcourir l'historique pour trouver la répétition la plus fraîche
-        for (let i = 0; i < tierSequence.length - 1; i++) {
-            if (tierSequence[i] === tierSequence[i+1]) {
-                // Répétition trouvée
-                freshestRepetitionIndex = i;
+        for (let i = 0; i < originalNumbers.length; i++) {
+            const num = originalNumbers[i];
+            const { tier } = classifyNumber(num);
+            
+            // Si c'est un zéro, on incrémente le compteur de zéros et on continue
+            if (tier === 0) {
+                zeroCount++;
+                continue;
+            }
+            
+            // Si c'est le premier numéro non-zéro, on l'enregistre
+            if (lastNonZeroTier === null) {
+                lastNonZeroTier = tier;
+                nonZeroCount++;
+                continue;
+            }
+            
+            // Si c'est une répétition, on arrête
+            if (tier === lastNonZeroTier) {
+                // On ajoute le nombre de zéros rencontrés au compteur de non-répétition
+                freshestRepetitionIndex = nonZeroCount - 1 + zeroCount;
                 break;
             }
+            
+            // Sinon, on met à jour lastNonZeroTier et on continue
+            lastNonZeroTier = tier;
+            nonZeroCount++;
         }
         
         // Si aucune répétition n'a été trouvée, utiliser la longueur totale de la séquence

@@ -17,6 +17,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const addRandomNumberBtn = document.getElementById('add-random-number-btn');
     const clearHistoryBtn = document.getElementById('clear-history-btn');
     
+    // Charger la session sauvegardée au démarrage
+    loadSavedSession();
+    
+    // Ajouter des gestionnaires d'événements pour la rotation de l'écran et la visibilité de la page
+    window.addEventListener('orientationchange', function() {
+        console.log('Orientation changée, sauvegarde de la session...');
+        saveSession();
+    });
+    
+    // Sauvegarder la session lorsque la page devient invisible (changement d'application)
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            console.log('Page cachée, sauvegarde de la session...');
+            saveSession();
+        } else if (document.visibilityState === 'visible') {
+            console.log('Page visible, chargement de la session...');
+            loadSavedSession();
+        }
+    });
+    
     // Sélectionner tous les numéros cliquables de la roulette
     const rouletteNumbers = document.querySelectorAll('.number-cell.clickable');
     
@@ -33,26 +53,86 @@ document.addEventListener('DOMContentLoaded', function() {
     // Current history of numbers (most recent first)
     let currentHistory = [];
     
+    // Charger l'historique et les paramètres sauvegardés
+    function loadSavedSession() {
+        try {
+            // Charger l'historique
+            const savedHistory = localStorage.getItem('rouletteHistory');
+            if (savedHistory) {
+                currentHistory = JSON.parse(savedHistory);
+                displayGeneratedNumbers(currentHistory);
+                
+                // Charger les états des paris (betIndices et signalHits)
+                const savedBetState = localStorage.getItem('rouletteBetState');
+                if (savedBetState) {
+                    const betState = JSON.parse(savedBetState);
+                    if (betState.betIndices) {
+                        // Restaurer les indices de paris
+                        window.betIndices = betState.betIndices;
+                    }
+                    if (betState.signalHits) {
+                        // Restaurer les signaux de hit
+                        window.signalHits = betState.signalHits;
+                    }
+                }
+            }
+            
+            // Charger les paramètres
+            const savedParams = localStorage.getItem('rouletteParams');
+            if (savedParams) {
+                const params = JSON.parse(savedParams);
+                if (params.baseBet) baseBetSelect.value = params.baseBet;
+                if (params.maxBet) maxBetSelect.value = params.maxBet;
+                if (params.threshold) thresholdSelect.value = params.threshold;
+            }
+            
+            // Recalculer les paris si l'historique existe
+            if (currentHistory.length >= 5) {
+                calculateNextBet();
+            }
+            
+            console.log('Session chargée avec succès');
+        } catch (error) {
+            console.error('Erreur lors du chargement de la session:', error);
+        }
+    }
+    
+    // Sauvegarder l'historique et les paramètres
+    function saveSession() {
+        try {
+            // Sauvegarder l'historique
+            localStorage.setItem('rouletteHistory', JSON.stringify(currentHistory));
+            
+            // Sauvegarder les paramètres
+            const params = {
+                baseBet: baseBetSelect.value,
+                maxBet: maxBetSelect.value,
+                threshold: thresholdSelect.value
+            };
+            localStorage.setItem('rouletteParams', JSON.stringify(params));
+            
+            // Sauvegarder l'état des paris (betIndices et signalHits)
+            if (typeof window.betIndices !== 'undefined' && typeof window.signalHits !== 'undefined') {
+                const betState = {
+                    betIndices: window.betIndices,
+                    signalHits: window.signalHits
+                };
+                localStorage.setItem('rouletteBetState', JSON.stringify(betState));
+            }
+            
+            console.log('Session sauvegardée avec succès');
+        } catch (error) {
+            console.error('Erreur lors de la sauvegarde de la session:', error);
+        }
+    }
+    
     /**
      * Clears all input fields and results
      */
     function clearAll() {
-        // Clear new number input
-        newNumberInput.value = '';
-        newNumberInput.classList.remove('error');
-        
         // Clear generated numbers display
         generatedNumbersContainer.innerHTML = '';
         currentHistory = [];
-        
-        // Reset results
-        columnSignalElement.textContent = 'Pas encore';
-        columnAbsenceElement.textContent = '-';
-        columnBetElement.textContent = '-';
-        
-        tierSignalElement.textContent = 'Pas encore';
-        tierAbsenceElement.textContent = '-';
-        tierBetElement.textContent = '-';
         
         // Reset tracking for columns
         column1AbsenceElement.textContent = '0';
@@ -63,6 +143,22 @@ document.addEventListener('DOMContentLoaded', function() {
         tier1AbsenceElement.textContent = '0';
         tier2AbsenceElement.textContent = '0';
         tier3AbsenceElement.textContent = '0';
+        
+        // Reset no-repetition counters
+        document.getElementById('column-1-no-rep').textContent = '0';
+        document.getElementById('column-2-no-rep').textContent = '0';
+        document.getElementById('column-3-no-rep').textContent = '0';
+        document.getElementById('tier-1-no-rep').textContent = '0';
+        document.getElementById('tier-2-no-rep').textContent = '0';
+        document.getElementById('tier-3-no-rep').textContent = '0';
+        
+        // Reset bet displays
+        document.getElementById('column-1-bet').textContent = '-';
+        document.getElementById('column-2-bet').textContent = '-';
+        document.getElementById('column-3-bet').textContent = '-';
+        document.getElementById('tier-1-bet').textContent = '-';
+        document.getElementById('tier-2-bet').textContent = '-';
+        document.getElementById('tier-3-bet').textContent = '-';
         
         // Remove any error messages
         const errorMsg = document.querySelector('.error-message');
@@ -75,6 +171,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Réinitialiser les paris visuels sur la table
         resetVisualBets();
+        
+        // Effacer les données sauvegardées
+        localStorage.removeItem('rouletteHistory');
+        // On garde les paramètres (mise initiale, max, seuil)
+        
+        console.log('Tableau complètement réinitialisé');
     }
     
     /**
@@ -104,15 +206,30 @@ document.addEventListener('DOMContentLoaded', function() {
      * Réinitialise l'affichage visuel des paris sur la table
      */
     function resetVisualBets() {
-        // Réinitialiser les paris sur les colonnes
+        // Réinitialiser les paris sur les colonnes dans le tableau de suivi
         updateVisualBet('bet-column-1', '-');
         updateVisualBet('bet-column-2', '-');
         updateVisualBet('bet-column-3', '-');
         
-        // Réinitialiser les paris sur les tiers
+        // Réinitialiser les paris sur les tiers dans le tableau de suivi
         updateVisualBet('bet-tier-1', '-');
         updateVisualBet('bet-tier-2', '-');
         updateVisualBet('bet-tier-3', '-');
+        
+        // Réinitialiser les paris visuels sur la table de roulette
+        // Colonnes
+        const columnBetVisuals = document.querySelectorAll('[id$="-bet-visual"]');
+        columnBetVisuals.forEach(element => {
+            element.textContent = '-';
+            element.classList.remove('active-bet');
+        });
+        
+        // Supprimer tous les paris visuels sur les numéros
+        document.querySelectorAll('.number-cell').forEach(cell => {
+            cell.classList.remove('bet-highlight');
+        });
+        
+        console.log('Paris visuels réinitialisés sur la table de roulette');
     }
 
 
@@ -158,6 +275,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 🔥 CALCUL TOUJOURS
         calculateNextBet();
+        
+        // Sauvegarder la session après chaque modification
+        saveSession();
     }
 
 
@@ -581,6 +701,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentHistory.length >= 5) {
             calculateNextBet();
         }
+        // Sauvegarder les paramètres
+        saveSession();
     });
     
     // Mise à jour automatique lors du changement de mise max
@@ -589,6 +711,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentHistory.length >= 5) {
             calculateNextBet();
         }
+        // Sauvegarder les paramètres
+        saveSession();
     });
     
     // Mise à jour automatique lors du changement de mise initiale
@@ -597,6 +721,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentHistory.length >= 5) {
             calculateNextBet();
         }
+        // Sauvegarder les paramètres
+        saveSession();
     });
     
     // Add random number button
@@ -612,6 +738,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Calculate bets based on the updated history
         calculateNextBet();
+        
+        // Sauvegarder la session
+        saveSession();
     });
     
     // Clear history button
@@ -624,6 +753,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reset all values
         clearAll();
+        
+        // Sauvegarder la session vide
+        saveSession();
     });
     
     // Generate random history button
