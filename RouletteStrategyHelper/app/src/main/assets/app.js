@@ -4,16 +4,21 @@
  * This file handles all the UI interactions and connects the UI with the business logic.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Générer automatiquement un historique aléatoire au démarrage pour tester
-    setTimeout(() => {
-        generateRandomHistory();
-    }, 500);
+// Attendre que le DOM soit complètement chargé avant d'initialiser les événements
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM chargé, initialisation des événements...');
     // DOM Elements
     const maxBetSelect = document.getElementById('max-bet');
-    const newNumberInput = document.getElementById('number-picker-input');
+    const thresholdSelect = document.getElementById('threshold');
+    const baseBetSelect = document.getElementById('base-bet');
     const randomHistoryBtn = document.getElementById('random-history-btn');
     const generatedNumbersContainer = document.getElementById('generated-numbers');
+    const undoBtn = document.getElementById('undo-last-number');
+    const addRandomNumberBtn = document.getElementById('add-random-number-btn');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+    
+    // Sélectionner tous les numéros cliquables de la roulette
+    const rouletteNumbers = document.querySelectorAll('.number-cell.clickable');
     
     // Tracking elements for columns
     const column1AbsenceElement = document.getElementById('column-1-absence');
@@ -64,15 +69,57 @@ document.addEventListener('DOMContentLoaded', () => {
         if (errorMsg) {
             errorMsg.remove();
         }
+        
+        // Réinitialiser les indices de paris
+        resetBetIndices();
+        
+        // Réinitialiser les paris visuels sur la table
+        resetVisualBets();
+    }
+    
+    /**
+     * Réinitialise tous les indices de paris
+     */
+    function resetBetIndices() {
+        // Réinitialiser les indices de paris dans roulette-logic.js
+        if (typeof betIndices !== 'undefined') {
+            betIndices.columns = { 1: 0, 2: 0, 3: 0 };
+            betIndices.tiers = { 1: 0, 2: 0, 3: 0 };
+            betIndices.noRepColumns = { 1: 0, 2: 0, 3: 0 };
+            betIndices.noRepTiers = { 1: 0, 2: 0, 3: 0 };
+            betIndices.columnsMaxBetPlayed = { 1: false, 2: false, 3: false };
+            betIndices.tiersMaxBetPlayed = { 1: false, 2: false, 3: false };
+        }
+        
+        // Réinitialiser les signaux de hit
+        if (typeof signalHits !== 'undefined') {
+            signalHits.columns = { 1: false, 2: false, 3: false };
+            signalHits.tiers = { 1: false, 2: false, 3: false };
+            signalHits.noRepColumns = { 1: false, 2: false, 3: false };
+            signalHits.noRepTiers = { 1: false, 2: false, 3: false };
+        }
+    }
+    
+    /**
+     * Réinitialise l'affichage visuel des paris sur la table
+     */
+    function resetVisualBets() {
+        // Réinitialiser les paris sur les colonnes
+        updateVisualBet('bet-column-1', '-');
+        updateVisualBet('bet-column-2', '-');
+        updateVisualBet('bet-column-3', '-');
+        
+        // Réinitialiser les paris sur les tiers
+        updateVisualBet('bet-tier-1', '-');
+        updateVisualBet('bet-tier-2', '-');
+        updateVisualBet('bet-tier-3', '-');
     }
 
 
 
     const numberGrid = document.getElementById('number-grid');
-    const numberPickerInput = document.getElementById('number-picker-input');
-    const undoBtn = document.getElementById('undo-last-number');
 
-    // Générer les boutons 0 → 36
+    // Générer les boutons 0 → 36 pour la grille de numéros (non utilisée actuellement)
     for (let i = 0; i <= 36; i++) {
         const btn = document.createElement('div');
         btn.className = 'number-btn';
@@ -80,26 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         btn.addEventListener('click', () => {
              addNumberAndRecalculate(i);
-                numberGrid.classList.add('hidden');
-                numberPickerInput.value = '';
+             numberGrid.classList.add('hidden');
         });
 
         numberGrid.appendChild(btn);
     }
-
-    // Afficher la grille au clic sur l’input
-    numberPickerInput.addEventListener('click', (e) => {
-        e.stopPropagation();
-        numberGrid.classList.remove('hidden');
-    });
-
-    numberGrid.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-
-    document.addEventListener('click', () => {
-        numberGrid.classList.add('hidden');
-    });
 
     // Supprimer le dernier numéro ajouté
     undoBtn.addEventListener('click', () => {
@@ -131,12 +163,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Met à jour l'affichage visuel d'un pari sur le tableau de roulette
-     * @param {string} elementId - ID de l'élément HTML à mettre à jour
+     * @param {string} elementId - ID de l'élément à mettre à jour
      * @param {string} betValue - Valeur du pari à afficher
      */
     function updateVisualBet(elementId, betValue) {
         const element = document.getElementById(elementId);
         if (!element) return;
+        
+        // Récupérer la mise initiale (valeur en euros)
+        const baseBet = parseInt(document.getElementById('base-bet').value) || 2;
         
         // Réinitialiser les classes
         element.classList.remove('active-bet');
@@ -145,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (betValue && betValue !== '-') {
             let betAmount = '-';
             
-            // Vérifier si c'est un pari combiné (format: "5(a) + 3(n) = 8 sur C1")
+            // Vérifier si c'est un pari combiné (format: "5(a) + 3(n) = 8")
             if (betValue.includes('=')) {
                 // Extraire le montant total après le signe =
                 const totalMatch = betValue.match(/=\s*(\d+)/);
@@ -153,15 +188,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     betAmount = totalMatch[1]; // Montant total après le signe =
                 }
             } else {
-                // Pari simple (format: "5(a) sur C1" ou "3(n) sur T2")
+                // Pari simple (format: "5(a)" ou "3(n)")
                 const match = betValue.match(/\d+/);
                 if (match) {
                     betAmount = match[0];
                 }
             }
             
+            // Convertir en euros en multipliant par la mise initiale
+            const betEuros = parseInt(betAmount) * baseBet;
+            
             // Mettre à jour le texte et ajouter la classe active
-            element.textContent = betAmount;
+            element.textContent = betEuros + '€';
             element.classList.add('active-bet');
         } else {
             // Pas de pari actif
@@ -186,8 +224,21 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {Array<number>} numbers - Array of numbers to display
      */
     function displayGeneratedNumbers(numbers) {
+        console.log('Affichage de l\'historique:', numbers);
+        
+        // Vérifier que le conteneur existe
+        if (!generatedNumbersContainer) {
+            console.error('Conteneur d\'historique introuvable!');
+            return;
+        }
+        
         // Clear the container
         generatedNumbersContainer.innerHTML = '';
+        
+        if (numbers.length === 0) {
+            console.log('Historique vide');
+            return;
+        }
         
         // Create rows of 10 numbers
         const rows = [];
@@ -226,6 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             generatedNumbersContainer.appendChild(rowElement);
         });
+        
+        console.log('Historique affiché avec', numbers.length, 'numéros');
     }
     
     /**
@@ -503,8 +556,51 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Event Listeners
     
+    // Ajouter des gestionnaires d'événements pour les numéros de la roulette
+    console.log('Initialisation des gestionnaires d\'événements pour', rouletteNumbers.length, 'numéros cliquables');
+    rouletteNumbers.forEach(numberCell => {
+        numberCell.addEventListener('click', () => {
+            // Récupérer le numéro depuis l'attribut data-number
+            const number = parseInt(numberCell.getAttribute('data-number'));
+            console.log('Clic sur le numéro', number);
+            
+            // Ajouter le numéro à l'historique et recalculer les paris
+            addNumberAndRecalculate(number);
+            
+            // Effet visuel pour indiquer que le numéro a été ajouté
+            numberCell.classList.add('just-clicked');
+            setTimeout(() => {
+                numberCell.classList.remove('just-clicked');
+            }, 300);
+        });
+    });
+    
+    // Mise à jour automatique lors du changement de seuil
+    thresholdSelect.addEventListener('change', () => {
+        // Recalculer les paris avec le nouveau seuil
+        if (currentHistory.length >= 5) {
+            calculateNextBet();
+        }
+    });
+    
+    // Mise à jour automatique lors du changement de mise max
+    maxBetSelect.addEventListener('change', () => {
+        // Recalculer les paris avec la nouvelle mise max
+        if (currentHistory.length >= 5) {
+            calculateNextBet();
+        }
+    });
+    
+    // Mise à jour automatique lors du changement de mise initiale
+    baseBetSelect.addEventListener('change', () => {
+        // Recalculer les paris avec la nouvelle mise initiale
+        if (currentHistory.length >= 5) {
+            calculateNextBet();
+        }
+    });
+    
     // Add random number button
-    document.getElementById('add-random-number-btn').addEventListener('click', () => {
+    addRandomNumberBtn.addEventListener('click', () => {
         // Generate a random number between 0 and 36
         const randomNum = Math.floor(Math.random() * 37);
         
@@ -519,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Clear history button
-    document.getElementById('clear-history-btn').addEventListener('click', () => {
+    clearHistoryBtn.addEventListener('click', () => {
         // Clear the history
         currentHistory = [];
         
@@ -530,45 +626,6 @@ document.addEventListener('DOMContentLoaded', () => {
         clearAll();
     });
     
-    // Add new number with Enter key
-    newNumberInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const newNum = parseInt(newNumberInput.value);
-            if (!isNaN(newNum) && newNum >= 0 && newNum <= 36) {
-                addNewNumber(newNum);
-            } else {
-                newNumberInput.classList.add('error');
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'error-message';
-                errorMsg.textContent = 'Veuillez entrer un numéro valide (0-36)';
-                const existingError = document.querySelector('.error-message');
-                if (existingError) existingError.remove();
-                document.querySelector('.new-number-input').after(errorMsg);
-            }
-        }
-    });
-    
     // Generate random history button
     randomHistoryBtn.addEventListener('click', generateRandomHistory);
-    
-    // Add input validation for new number field
-    newNumberInput.addEventListener('input', function() {
-        // Remove non-numeric characters
-        this.value = this.value.replace(/[^0-9]/g, '');
-        
-        // Limit to 2 digits
-        if (this.value.length > 2) {
-            this.value = this.value.slice(0, 2);
-        }
-        
-        // Ensure value is within range
-        const num = parseInt(this.value);
-        if (!isNaN(num) && num > 36) {
-            this.value = '36';
-        }
-        
-        // Remove error class when typing
-        this.classList.remove('error');
-    });
 });

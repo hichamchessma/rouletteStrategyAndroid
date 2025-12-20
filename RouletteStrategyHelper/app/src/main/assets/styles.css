@@ -829,6 +829,50 @@ button {
     margin-top: 20px;
 }
 
+.roulette-layout.full-width {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Style pour le zéro */
+.zero-row {
+    display: flex;
+    height: 40px;
+    margin-bottom: 5px;
+}
+
+.zero-spacer {
+    flex: 1;
+}
+
+/* Style pour les numéros cliquables */
+.clickable {
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.clickable:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    z-index: 10;
+}
+
+.clickable:active {
+    transform: scale(0.95);
+}
+
+/* Effet visuel lorsqu'un numéro est cliqué */
+.just-clicked {
+    animation: pulse-click 0.3s ease-in-out;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+@keyframes pulse-click {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
 .roulette-grid {
     display: flex;
     flex-direction: column;
@@ -866,6 +910,10 @@ button {
 
 .red {
     background-color: #d10000;
+}
+
+.green {
+    background-color: #008000;
 }
 
 .column-bet {
@@ -918,5 +966,223 @@ button {
 /* Tableau d'informations */
 .tracking-info {
     margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-start;
 }
 
+/* Styles pour les contrôles déplacés à côté du tableau */
+.controls-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+    overflow-y: auto;
+    max-height: 600px;
+}
+
+.controls-sidebar .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 100px;
+}
+
+.controls-sidebar label {
+    font-weight: 600;
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+
+.controls-sidebar .select-input {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background-color: white;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.sidebar-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.horizontal-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.sidebar-buttons .action-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+}
+
+/* Styles pour l'historique dans la barre latérale */
+.sidebar-history {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 5px;
+    background-color: #fff;
+    margin-bottom: 10px;
+}
+
+.sidebar-history .generated-numbers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-start;
+}
+
+.sidebar-history .generated-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+}
+
+/* Styles pour le champ de saisie dans la barre latérale */
+.sidebar-input {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.sidebar-input .compact-input {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Responsive pour les contrôles latéraux */
+@media (max-width: 768px) {
+    .tracking-info {
+        flex-direction: column;
+    }
+    
+    .controls-sidebar {
+        width: 100%;
+    }
+    
+    .controls-row {
+        flex-direction: column;
+    }
+    
+    .sidebar-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+/* Styles pour la nouvelle disposition horizontale */
+.controls-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Ajustement pour le champ de saisie dans la nouvelle disposition */
+.controls-row .sidebar-input {
+    min-width: 120px;
+    margin-bottom: 0;
+}
+
+/* Style pour les boutons en mode horizontal */
+.horizontal-buttons .action-btn {
+    flex: 1;
+    min-width: 120px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+}
+
+/* Mode paysage (landscape) amélioré */
+@media (orientation: landscape) {
+    .controls-sidebar {
+        max-height: none;
+    }
+    
+    .controls-row {
+        flex-wrap: wrap;
+    }
+}
+
+/* Styles pour la nouvelle disposition */
+.bottom-section {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.tracking-info-container {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+}
+
+.undo-container {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.undo-container .undo-btn {
+    padding: 8px 15px;
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #4b5563;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.undo-container .undo-btn:hover {
+    background-color: #e5e7eb;
+}
+
+/* Ajustements pour le mode horizontal */
+@media (orientation: landscape) {
+    .roulette-layout.full-width .roulette-grid {
+        width: 100%;
+    }
+    
+    .bottom-section {
+        flex-direction: row;
+    }
+    
+    .controls-sidebar {
+        flex: 1;
+    }
+}
+
+/* Ajustements pour les petits écrans */
+@media (max-width: 768px) {
+    .bottom-section {
+        flex-direction: column;
+    }
+    
+    .tracking-info-container {
+        max-width: none;
+    }
+}

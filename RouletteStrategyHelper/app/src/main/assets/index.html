@@ -11,123 +11,70 @@
     <div class="container">
         <h1>Aide à la Décision Roulette</h1>
         
-        <div class="input-section">
-            <div class="compact-controls">
-                <div class="controls-row">
-                    <div class="control-group">
-                        <h2>Historique</h2>
-                        <div class="input-group">
-                            <div class="number-picker-wrapper">
-                                <input
-                                        type="text"
-                                        id="number-picker-input"
-                                        placeholder="Nouveau N°"
-                                        readonly
-                                        class="compact-input"
-                                />
-
-                                <button id="undo-last-number" class="undo-btn" title="Supprimer le dernier numéro">
-                                    ⌫
-                                </button>
-                            </div>
-
-                            <div class="number-grid hidden" id="number-grid"></div>
-                            <select id="max-bet" title="Valeur maximale de mise" class="compact-select">
-                                <option value="1">Max: 1</option>
-                                <option value="2">Max: 2</option>
-                                <option value="3">Max: 3</option>
-                                <option value="5">Max: 5</option>
-                                <option value="8" selected>Max: 8</option>
-                                <option value="12">Max: 12</option>
-                                <option value="18">Max: 18</option>
-                                <option value="27">Max: 27</option>
-                                <option value="41">Max: 41</option>
-                                <option value="60">Max: 60</option>
-                                <option value="100">Max: 100</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="buttons-group compact-buttons">
-                        <button id="random-history-btn" class="action-btn" title="Générer un historique aléatoire">
-                            <i class="fas fa-dice"></i> Générer Aléatoire
-                        </button>
-                        <button id="add-random-number-btn" class="action-btn" title="Ajouter un numéro aléatoire">
-                            <i class="fas fa-plus-circle"></i> Numéro Aléatoire
-                        </button>
-                        <button id="clear-history-btn" class="action-btn clear-btn" title="Effacer l'historique">
-                            <i class="fas fa-trash"></i> Effacer
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="history-container compact-history">
-                <div class="history-labels">
-                    <span class="history-label">Plus récent</span>
-                    <span class="history-label">Plus ancien</span>
-                </div>
-                <div class="numbers-display">
-                    <div class="generated-numbers" id="generated-numbers"></div>
-                </div>
-            </div>
-        </div>
+        <!-- Section d'entrée supprimée car déplacée dans la zone latérale -->
         
         <div class="results-container">
             <div class="main-section">
                 <h3 class="section-title">Tableau de suivi</h3>
                 
                 <!-- Tableau de roulette visuel -->
-                <div class="roulette-layout">
+                <div class="roulette-layout full-width">
                     <!-- Grille principale des numéros -->
                     <div class="roulette-grid">
+                        <!-- Ligne 0 (Zero) -->
+                        <div class="roulette-row zero-row">
+                            <div class="number-cell green clickable" data-number="0">0</div>
+                            <div class="zero-spacer"></div>
+                        </div>
+                        
                         <!-- Ligne 3 (C3) -->
                         <div class="roulette-row">
-                            <div class="number-cell black">3</div>
-                            <div class="number-cell red">6</div>
-                            <div class="number-cell black">9</div>
-                            <div class="number-cell red">12</div>
-                            <div class="number-cell black">15</div>
-                            <div class="number-cell red">18</div>
-                            <div class="number-cell black">21</div>
-                            <div class="number-cell red">24</div>
-                            <div class="number-cell black">27</div>
-                            <div class="number-cell red">30</div>
-                            <div class="number-cell black">33</div>
-                            <div class="number-cell red">36</div>
+                            <div class="number-cell black clickable" data-number="3">3</div>
+                            <div class="number-cell red clickable" data-number="6">6</div>
+                            <div class="number-cell black clickable" data-number="9">9</div>
+                            <div class="number-cell red clickable" data-number="12">12</div>
+                            <div class="number-cell black clickable" data-number="15">15</div>
+                            <div class="number-cell red clickable" data-number="18">18</div>
+                            <div class="number-cell black clickable" data-number="21">21</div>
+                            <div class="number-cell red clickable" data-number="24">24</div>
+                            <div class="number-cell black clickable" data-number="27">27</div>
+                            <div class="number-cell red clickable" data-number="30">30</div>
+                            <div class="number-cell black clickable" data-number="33">33</div>
+                            <div class="number-cell red clickable" data-number="36">36</div>
                             <div class="column-bet" id="column-3-bet-visual">-</div>
                         </div>
                         
                         <!-- Ligne 2 (C2) -->
                         <div class="roulette-row">
-                            <div class="number-cell red">2</div>
-                            <div class="number-cell black">5</div>
-                            <div class="number-cell red">8</div>
-                            <div class="number-cell black">11</div>
-                            <div class="number-cell red">14</div>
-                            <div class="number-cell black">17</div>
-                            <div class="number-cell red">20</div>
-                            <div class="number-cell black">23</div>
-                            <div class="number-cell red">26</div>
-                            <div class="number-cell black">29</div>
-                            <div class="number-cell red">32</div>
-                            <div class="number-cell black">35</div>
+                            <div class="number-cell red clickable" data-number="2">2</div>
+                            <div class="number-cell black clickable" data-number="5">5</div>
+                            <div class="number-cell red clickable" data-number="8">8</div>
+                            <div class="number-cell black clickable" data-number="11">11</div>
+                            <div class="number-cell red clickable" data-number="14">14</div>
+                            <div class="number-cell black clickable" data-number="17">17</div>
+                            <div class="number-cell red clickable" data-number="20">20</div>
+                            <div class="number-cell black clickable" data-number="23">23</div>
+                            <div class="number-cell red clickable" data-number="26">26</div>
+                            <div class="number-cell black clickable" data-number="29">29</div>
+                            <div class="number-cell red clickable" data-number="32">32</div>
+                            <div class="number-cell black clickable" data-number="35">35</div>
                             <div class="column-bet" id="column-2-bet-visual">-</div>
                         </div>
                         
                         <!-- Ligne 1 (C1) -->
                         <div class="roulette-row">
-                            <div class="number-cell black">1</div>
-                            <div class="number-cell red">4</div>
-                            <div class="number-cell black">7</div>
-                            <div class="number-cell red">10</div>
-                            <div class="number-cell black">13</div>
-                            <div class="number-cell red">16</div>
-                            <div class="number-cell black">19</div>
-                            <div class="number-cell red">22</div>
-                            <div class="number-cell black">25</div>
-                            <div class="number-cell red">28</div>
-                            <div class="number-cell black">31</div>
-                            <div class="number-cell red">34</div>
+                            <div class="number-cell black clickable" data-number="1">1</div>
+                            <div class="number-cell red clickable" data-number="4">4</div>
+                            <div class="number-cell black clickable" data-number="7">7</div>
+                            <div class="number-cell red clickable" data-number="10">10</div>
+                            <div class="number-cell black clickable" data-number="13">13</div>
+                            <div class="number-cell red clickable" data-number="16">16</div>
+                            <div class="number-cell black clickable" data-number="19">19</div>
+                            <div class="number-cell red clickable" data-number="22">22</div>
+                            <div class="number-cell black clickable" data-number="25">25</div>
+                            <div class="number-cell red clickable" data-number="28">28</div>
+                            <div class="number-cell black clickable" data-number="31">31</div>
+                            <div class="number-cell red clickable" data-number="34">34</div>
                             <div class="column-bet" id="column-1-bet-visual">-</div>
                         </div>
                         
@@ -138,9 +85,12 @@
                             <div class="tier-cell" id="tier-3-bet-visual">3rd 12</div>
                         </div>
                     </div>
-                    
-                    <!-- Tableau d'informations -->
-                    <div class="tracking-info">
+                </div>
+                
+                <!-- Section inférieure avec tableau de suivi et contrôles -->
+                <div class="bottom-section">
+                    <!-- Tableau d'informations (gauche) -->
+                    <div class="tracking-info-container">
                         <table class="tracking-table">
                             <thead>
                                 <tr>
@@ -189,6 +139,89 @@
                                 </tr>
                             </tbody>
                         </table>
+                        
+                        <!-- Bouton de suppression du dernier numéro -->
+                        <div class="undo-container">
+                            <button id="undo-last-number" class="undo-btn" title="Supprimer le dernier numéro">
+                                <i class="fas fa-undo"></i> Annuler dernier numéro
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Contrôles et historique (droite) -->
+                    <div class="controls-sidebar">
+                        <!-- Historique des numéros (remonté en haut) -->
+                        <div class="history-container sidebar-history">
+                            <div class="history-labels">
+                                <span class="history-label">Plus récent</span>
+                                <span class="history-label">Plus ancien</span>
+                            </div>
+                            <div class="numbers-display">
+                                <div class="generated-numbers" id="generated-numbers"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Paramètres -->
+                        <div class="controls-row">
+                            <div class="input-group">
+                                <label for="base-bet">Mise Initiale</label>
+                                <select id="base-bet" class="select-input">
+                                    <option value="1">1€</option>
+                                    <option value="2" selected>2€</option>
+                                    <option value="3">3€</option>
+                                    <option value="4">4€</option>
+                                    <option value="5">5€</option>
+                                    <option value="6">6€</option>
+                                    <option value="7">7€</option>
+                                    <option value="8">8€</option>
+                                    <option value="9">9€</option>
+                                    <option value="10">10€</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="max-bet">Mise Max</label>
+                                <select id="max-bet" class="select-input">
+                                    <option value="1">Max: 1</option>
+                                    <option value="2">Max: 2</option>
+                                    <option value="3">Max: 3</option>
+                                    <option value="5">Max: 5</option>
+                                    <option value="8" selected>Max: 8</option>
+                                    <option value="12">Max: 12</option>
+                                    <option value="18">Max: 18</option>
+                                    <option value="27">Max: 27</option>
+                                    <option value="41">Max: 41</option>
+                                    <option value="60">Max: 60</option>
+                                    <option value="100">Max: 100</option>
+                                </select>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="threshold">Seuil</label>
+                                <select id="threshold" class="select-input">
+                                    <option value="2">Seuil: 2</option>
+                                    <option value="3">Seuil: 3</option>
+                                    <option value="4">Seuil: 4</option>
+                                    <option value="5" selected>Seuil: 5</option>
+                                    <option value="6">Seuil: 6</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Boutons -->
+                        <div class="buttons-group sidebar-buttons horizontal-buttons">
+                            <button id="random-history-btn" class="action-btn" title="Générer un historique aléatoire">
+                                <i class="fas fa-dice"></i> Générer Aléatoire
+                            </button>
+                            <button id="add-random-number-btn" class="action-btn" title="Ajouter un numéro aléatoire">
+                                <i class="fas fa-plus-circle"></i> Numéro Aléatoire
+                            </button>
+                            <button id="clear-history-btn" class="action-btn clear-btn" title="Effacer l'historique">
+                                <i class="fas fa-trash"></i> Effacer
+                            </button>
+                        </div>
+                        
+                        <div class="number-grid hidden" id="number-grid"></div>
                     </div>
                 </div>
             </div>
